@@ -21,6 +21,10 @@ export default function App() {
 
   const handleDatepickerClose = () => setShowDatepicker(false);
 
+  const showMonthPicker = () => setType("month");
+
+  const showYearPicker = () => setType("year");
+
   return (
     <div className="h-screen w-screen flex items-center justify-center bg-gray-200 ">
       <div className="antialiased sans-serif">
@@ -88,12 +92,18 @@ export default function App() {
                           </svg>
                         </button>
                       </div>
-                      <div className="flex-grow cursor-pointer hover:bg-gray-200 rounded-lg">
+                      <div
+                        onClick={showMonthPicker}
+                        className="flex-grow cursor-pointer hover:bg-gray-200 rounded-lg"
+                      >
                         <span className="text-lg font-bold text-gray-800">
                           {format(datepickerHeaderDate, "MM")}
                         </span>
                       </div>
-                      <div className="flex-grow cursor-pointer hover:bg-gray-200 rounded-lg">
+                      <div
+                        onClick={showYearPicker}
+                        className="flex-grow cursor-pointer hover:bg-gray-200 rounded-lg"
+                      >
                         <span className="text-lg font-bold text-gray-800">
                           {format(datepickerHeaderDate, "yyyy")}
                         </span>
