@@ -1,2 +1,2 @@
-# react-tailwind-datepicker-test
+# react-tailwind-datepicker
 Created with CodeSandbox
