@@ -2,10 +2,14 @@ import { useState } from "react";
 import { format, subMonths, addMonths } from "date-fns";
 import Datepicker from "./Datepicker";
 
+type DatepickerType = "date" | "month" | "year";
+
 export default function App() {
   const [showDatepicker, setShowDatepicker] = useState(false);
   const [datepickerHeaderDate, setDatepickerHeaderDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
+
+  const [type, setType] = useState<DatepickerType>("date");
 
   const decrementMonth = () =>
     setDatepickerHeaderDate((prev) => subMonths(prev, 1));
@@ -14,6 +18,8 @@ export default function App() {
     setDatepickerHeaderDate((prev) => addMonths(prev, 1));
 
   const toggleDatepicker = () => setShowDatepicker((prev) => !prev);
+
+  const handleDatepickerClose = () => setShowDatepicker(false);
 
   return (
     <div className="h-screen w-screen flex items-center justify-center bg-gray-200 ">
@@ -114,12 +120,30 @@ export default function App() {
                         </button>
                       </div>
                     </div>
-                    <Datepicker
-                      headerDate={datepickerHeaderDate}
-                      selectedDate={selectedDate}
-                      setSelectedDate={setSelectedDate}
-                      closeDatepicker={() => setShowDatepicker(false)}
-                    />
+                    {type === "date" && (
+                      <Datepicker
+                        headerDate={datepickerHeaderDate}
+                        selectedDate={selectedDate}
+                        setSelectedDate={setSelectedDate}
+                        closeDatepicker={handleDatepickerClose}
+                      />
+                    )}
+                    {type === "month" && (
+                      <Datepicker
+                        headerDate={datepickerHeaderDate}
+                        selectedDate={selectedDate}
+                        setSelectedDate={setSelectedDate}
+                        closeDatepicker={() => setShowDatepicker(false)}
+                      />
+                    )}{" "}
+                    {type === "year" && (
+                      <Datepicker
+                        headerDate={datepickerHeaderDate}
+                        selectedDate={selectedDate}
+                        setSelectedDate={setSelectedDate}
+                        closeDatepicker={() => setShowDatepicker(false)}
+                      />
+                    )}
                   </div>
                 )}
               </div>
