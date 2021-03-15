@@ -1,15 +1,24 @@
-import { useState } from "react";
-import { format, subMonths, addMonths, subYears, addYears } from "date-fns";
-import Datepicker from "./Datepicker";
-import Monthpicker from "./Monthpicker";
+import { useState, useEffect } from "react";
+import {
+  format,
+  subMonths,
+  addMonths,
+  subYears,
+  addYears,
+  isEqual,
+  getDaysInMonth,
+  getDay
+} from "date-fns";
 
 type DatepickerType = "date" | "month" | "year";
 
 export default function App() {
+  const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const [dayCount, setDayCount] = useState<Array<number>>([]);
+  const [blankDays, setBlankDays] = useState<Array<number>>([]);
   const [showDatepicker, setShowDatepicker] = useState(false);
   const [datepickerHeaderDate, setDatepickerHeaderDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
-
   const [type, setType] = useState<DatepickerType>("date");
 
   const decrement = () => {
@@ -40,15 +49,68 @@ export default function App() {
     }
   };
 
-  const toggleDatepicker = () => setShowDatepicker((prev) => !prev);
+  const isToday = (date: number) =>
+    isEqual(
+      new Date(selectedDate.getFullYear(), selectedDate.getMonth(), date),
+      selectedDate
+    );
 
-  const handleDatepickerClose = () => setShowDatepicker(false);
+  const setDateValue = (date: number) => () => {
+    setSelectedDate(
+      new Date(
+        datepickerHeaderDate.getFullYear(),
+        datepickerHeaderDate.getMonth(),
+        date
+      )
+    );
+    setShowDatepicker(false);
+  };
+
+  const getDayCount = (date: Date) => {
+    let daysInMonth = getDaysInMonth(date);
+
+    // find where to start calendar day of week
+    let dayOfWeek = getDay(new Date(date.getFullYear(), date.getMonth(), 1));
+    let blankdaysArray = [];
+    for (let i = 1; i <= dayOfWeek; i++) {
+      blankdaysArray.push(i);
+    }
+
+    let daysArray = [];
+    for (let i = 1; i <= daysInMonth; i++) {
+      daysArray.push(i);
+    }
+
+    setBlankDays(blankdaysArray);
+    setDayCount(daysArray);
+  };
+
+  const isSelectedMonth = (month: number) =>
+    isEqual(
+      new Date(selectedDate.getFullYear(), month, selectedDate.getDate()),
+      selectedDate
+    );
+
+  const setMonthValue = (month: number) => () => {
+    setDatepickerHeaderDate(
+      new Date(
+        datepickerHeaderDate.getFullYear(),
+        month,
+        datepickerHeaderDate.getDate()
+      )
+    );
+    setType("date");
+  };
+
+  const toggleDatepicker = () => setShowDatepicker((prev) => !prev);
 
   const showMonthPicker = () => setType("month");
 
-  const showYearPicker = () => setType("year");
+  const showYearPicker = () => setType("date");
 
-  const handleChangeType = (type: DatepickerType) => () => setType(type);
+  useEffect(() => {
+    getDayCount(datepickerHeaderDate);
+  }, [datepickerHeaderDate]);
 
   return (
     <div className="h-screen w-screen flex items-center justify-center bg-gray-200 ">
@@ -123,7 +185,7 @@ export default function App() {
                           className="flex-grow p-1 text-lg font-bold text-gray-800 cursor-pointer hover:bg-gray-200 rounded-lg"
                         >
                           <p className="text-center">
-                            {format(datepickerHeaderDate, "MM")}
+                            {format(datepickerHeaderDate, "MMMM")}
                           </p>
                         </div>
                       )}
@@ -158,24 +220,82 @@ export default function App() {
                       </div>
                     </div>
                     {type === "date" && (
-                      <Datepicker
-                        headerDate={datepickerHeaderDate}
-                        selectedDate={selectedDate}
-                        setSelectedDate={setSelectedDate}
-                        closeDatepicker={handleDatepickerClose}
-                      />
+                      <>
+                        <div className="flex flex-wrap mb-3 -mx-1">
+                          {DAYS.map((day, i) => (
+                            <div
+                              key={i}
+                              style={{ width: "14.26%" }}
+                              className="px-1"
+                            >
+                              <div className="text-gray-800 font-medium text-center text-xs">
+                                {day}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="flex flex-wrap -mx-1">
+                          {blankDays.map((_, i) => (
+                            <div
+                              key={i}
+                              style={{ width: "14.26%" }}
+                              className="text-center border p-1 border-transparent text-sm"
+                            ></div>
+                          ))}
+                          {dayCount.map((d, i) => (
+                            <div
+                              key={i}
+                              style={{ width: "14.26%" }}
+                              className="px-1 mb-1"
+                            >
+                              <div
+                                onClick={setDateValue(d)}
+                                className={`cursor-pointer text-center text-sm leading-none rounded-full leading-loose transition ease-in-out duration-100 ${
+                                  isToday(d)
+                                    ? "bg-blue-500 text-white"
+                                    : "text-gray-700 hover:bg-blue-200"
+                                }`}
+                              >
+                                {d}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </>
                     )}
                     {type === "month" && (
-                      <Monthpicker
-                        headerDate={datepickerHeaderDate}
-                        selectedDate={selectedDate}
-                        setSelectedDate={setSelectedDate}
-                        changeType={handleChangeType("date")}
-                      />
+                      <div className="flex flex-wrap -mx-1">
+                        {Array(12)
+                          .fill(null)
+                          .map((_, i) => (
+                            <div
+                              key={i}
+                              onClick={setMonthValue(i)}
+                              style={{ width: "25%" }}
+                            >
+                              <div
+                                className={`cursor-pointer p-5 font-semibold text-center text-sm rounded-lg hover:bg-gray-200 ${
+                                  isSelectedMonth(i)
+                                    ? "bg-blue-500 text-white"
+                                    : "text-gray-700 hover:bg-blue-200"
+                                }`}
+                              >
+                                {format(
+                                  new Date(
+                                    datepickerHeaderDate.getFullYear(),
+                                    i,
+                                    datepickerHeaderDate.getDate()
+                                  ),
+                                  "MMM"
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                      </div>
                     )}{" "}
                     {type === "year" && (
                       <Datepicker
-                        headerDate={datepickerHeaderDate}
+                        datepickerHeaderDate={datepickerHeaderDate}
                         selectedDate={selectedDate}
                         setSelectedDate={setSelectedDate}
                         closeDatepicker={() => setShowDatepicker(false)}
