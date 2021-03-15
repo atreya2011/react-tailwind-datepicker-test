@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { format, subMonths, addMonths } from "date-fns";
+import { format, subMonths, addMonths, subYears, addYears } from "date-fns";
 import Datepicker from "./Datepicker";
+import Monthpicker from "./Monthpicker";
 
 type DatepickerType = "date" | "month" | "year";
 
@@ -11,11 +12,33 @@ export default function App() {
 
   const [type, setType] = useState<DatepickerType>("date");
 
-  const decrementMonth = () =>
-    setDatepickerHeaderDate((prev) => subMonths(prev, 1));
+  const decrement = () => {
+    switch (type) {
+      case "date":
+        setDatepickerHeaderDate((prev) => subMonths(prev, 1));
+        break;
+      case "month":
+        setDatepickerHeaderDate((prev) => subYears(prev, 1));
+        break;
+      case "year":
+        setDatepickerHeaderDate((prev) => subMonths(prev, 1));
+        break;
+    }
+  };
 
-  const incrementMonth = () =>
-    setDatepickerHeaderDate((prev) => addMonths(prev, 1));
+  const increment = () => {
+    switch (type) {
+      case "date":
+        setDatepickerHeaderDate((prev) => addMonths(prev, 1));
+        break;
+      case "month":
+        setDatepickerHeaderDate((prev) => addYears(prev, 1));
+        break;
+      case "year":
+        setDatepickerHeaderDate((prev) => subMonths(prev, 1));
+        break;
+    }
+  };
 
   const toggleDatepicker = () => setShowDatepicker((prev) => !prev);
 
@@ -24,6 +47,8 @@ export default function App() {
   const showMonthPicker = () => setType("month");
 
   const showYearPicker = () => setType("year");
+
+  const handleChangeType = (type: DatepickerType) => () => setType(type);
 
   return (
     <div className="h-screen w-screen flex items-center justify-center bg-gray-200 ">
@@ -75,7 +100,7 @@ export default function App() {
                         <button
                           type="button"
                           className="transition ease-in-out duration-100 inline-flex cursor-pointer hover:bg-gray-200 p-1 rounded-full"
-                          onClick={decrementMonth}
+                          onClick={decrement}
                         >
                           <svg
                             className="h-6 w-6 text-gray-500 inline-flex"
@@ -92,27 +117,29 @@ export default function App() {
                           </svg>
                         </button>
                       </div>
-                      <div
-                        onClick={showMonthPicker}
-                        className="flex-grow cursor-pointer hover:bg-gray-200 rounded-lg"
-                      >
-                        <span className="text-lg font-bold text-gray-800">
-                          {format(datepickerHeaderDate, "MM")}
-                        </span>
-                      </div>
+                      {type === "date" && (
+                        <div
+                          onClick={showMonthPicker}
+                          className="flex-grow p-1 text-lg font-bold text-gray-800 cursor-pointer hover:bg-gray-200 rounded-lg"
+                        >
+                          <p className="text-center">
+                            {format(datepickerHeaderDate, "MM")}
+                          </p>
+                        </div>
+                      )}
                       <div
                         onClick={showYearPicker}
-                        className="flex-grow cursor-pointer hover:bg-gray-200 rounded-lg"
+                        className="flex-grow p-1 text-lg font-bold text-gray-800 cursor-pointer hover:bg-gray-200 rounded-lg"
                       >
-                        <span className="text-lg font-bold text-gray-800">
+                        <p className="text-center">
                           {format(datepickerHeaderDate, "yyyy")}
-                        </span>
+                        </p>
                       </div>
                       <div>
                         <button
                           type="button"
                           className="transition ease-in-out duration-100 inline-flex cursor-pointer hover:bg-gray-200 p-1 rounded-full"
-                          onClick={incrementMonth}
+                          onClick={increment}
                         >
                           <svg
                             className="h-6 w-6 text-gray-500 inline-flex"
@@ -139,11 +166,11 @@ export default function App() {
                       />
                     )}
                     {type === "month" && (
-                      <Datepicker
+                      <Monthpicker
                         headerDate={datepickerHeaderDate}
                         selectedDate={selectedDate}
                         setSelectedDate={setSelectedDate}
-                        closeDatepicker={() => setShowDatepicker(false)}
+                        changeType={handleChangeType("date")}
                       />
                     )}{" "}
                     {type === "year" && (
